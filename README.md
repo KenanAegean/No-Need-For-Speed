@@ -6,12 +6,12 @@ FG Game Network Course Assigment
 - Teacher referance: <a href="">Toby van Buynder</a>
 
 <p align="center">
-  <img src="" width="350" title="hover text"><br>
+  <img src="for_readme/logo.png" width="350" title="hover text"><br>
   <a href="">Try Game On Browser</a>
 </p>
 
-##Assigment
-###Assigment Description
+## Assigment
+### Assigment Description
 ```
 Assignment Developing a Simple Networked Game Using Unity's NGO
 Due 17 January 2025 23:59
