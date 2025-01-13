@@ -6,7 +6,7 @@ FG Game Network Course Assigment
 - Teacher referance: <a href="">Toby van Buynder</a>
 
 <p align="center">
-  <img src="for_readme/logo.png" width="350" title="hover text"><br>
+  <img src="for_readme/logo_white.png" width="350" title="hover text"><br>
   <a href="">Try Game On Browser</a>
 </p>
 
