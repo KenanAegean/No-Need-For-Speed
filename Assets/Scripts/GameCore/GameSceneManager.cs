@@ -42,11 +42,11 @@ public class GameSceneManager : MonoBehaviour
         ShowStartPanel();
 
         // Add listeners to buttons
-        readyButton.onClick.AddListener(OnReadyButtonClicked);
-        mainMenuButton.onClick.AddListener(ShowStartPanel);
+        readyButton.onClick.AddListener(OnReadyButtonClicked); // Fixed here
+        mainMenuButton.onClick.AddListener(ReturnToMainMenu);
         exitButton.onClick.AddListener(ExitGame);
         restartButton.onClick.AddListener(RestartGame);
-        menuButton.onClick.AddListener(ShowStartPanel);
+        menuButton.onClick.AddListener(ReturnToMainMenu);
         exitButtonEnd.onClick.AddListener(ExitGame);
 
         resetCarButton.onClick.AddListener(ResetCar);
@@ -91,6 +91,11 @@ public class GameSceneManager : MonoBehaviour
         UpdateInGamePanelText();
     }
 
+    public void ShowEndGamePanel()
+    {
+        ShowEndGamePanel("Default Winner");
+    }
+
     public void ShowEndGamePanel(string winner)
     {
         SetActivePanel(endGamePanel);
@@ -100,6 +105,7 @@ public class GameSceneManager : MonoBehaviour
 
     public void ShowESCMenuPanel()
     {
+        inGamePanel.SetActive(false);
         escMenuPanel.SetActive(true);
         UpdateESCMenuText();
     }
@@ -120,16 +126,15 @@ public class GameSceneManager : MonoBehaviour
         panel.SetActive(true);
     }
 
-    private void OnReadyButtonClicked()
+    public void OnReadyButtonClicked()
     {
         playersReady++;
+        UpdateReadyPanelText();
+
+        // If all players are ready, start the game
         if (playersReady >= totalPlayers)
         {
             ShowInGamePanel();
-        }
-        else
-        {
-            UpdateReadyPanelText();
         }
     }
 
@@ -148,25 +153,25 @@ public class GameSceneManager : MonoBehaviour
         playerTextESCMenu.text = $"Players Ready: {playersReady}/{totalPlayers}";
     }
 
-    private void RestartGame()
+    public void RestartGame()
     {
-        // Logic for restarting the game (if needed)
         ShowReadyPanel();
     }
 
-    private void ResetCar()
+    public void ResetCar()
     {
         Debug.Log("Car reset logic triggered.");
         // Add your car reset logic here
     }
 
-    private void ExitSession()
+    public void ExitSession()
     {
         Debug.Log("Exit session logic triggered.");
         // Add your exit session logic here
+        ReturnToMainMenu();
     }
 
-    private void ExitGame()
+    public void ExitGame()
     {
         Application.Quit();
     }
@@ -181,5 +186,18 @@ public class GameSceneManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         isGamePaused = false;
+    }
+
+    public void ReturnToMainMenu()
+    {
+        // Reset the game state (e.g., scores, player ready counts, etc.)
+        playersReady = 0; // Reset ready count
+        Time.timeScale = 1f; // Ensure the game is running
+
+        // Perform any other game-specific reset logic here
+        Debug.Log("Game reset and returning to main menu.");
+
+        // Show the Start Panel
+        ShowStartPanel();
     }
 }
