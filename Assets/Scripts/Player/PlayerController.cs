@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Car Settings")]
     public float acceleration = 10000f; // Forward acceleration force.
@@ -17,11 +18,20 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ; // Prevent flipping.
+        if (rb == null)
+        {
+            Debug.LogError("Rigidbody is missing from PlayerController.");
+            return;
+        }
+
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
     }
 
     private void Update()
     {
+        // Allow only the owner of this player object to control it
+        if (!IsOwner) return;
+
         // Get input from the old input system.
         moveInput = Input.GetAxis("Vertical");
         turnInput = Input.GetAxis("Horizontal");
@@ -29,6 +39,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // Allow only the owner of this player object to control it
+        if (!IsOwner) return;
+
         HandleMovement();
     }
 

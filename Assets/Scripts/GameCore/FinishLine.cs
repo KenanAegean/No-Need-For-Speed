@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class FinishLine : MonoBehaviour
+public class FinishLine : NetworkBehaviour
 {
     public GameCoreManager gameCoreManager; // Reference to GameCoreManager
     public bool useSpecificDirection = false; // Toggle to enable/disable direction checking
@@ -21,18 +22,20 @@ public class FinishLine : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        // Check if the object that triggered the collider is a player
+        if (IsServer && other.CompareTag("Player"))
         {
+            // Direction validation logic
             if (!useSpecificDirection || allowedDirections == AllowedDirection.Any)
             {
-                gameCoreManager.PlayerReachedFinishLine();
+                NotifyFinishLineServerRpc(other.GetComponent<NetworkObject>().OwnerClientId);
                 return;
             }
 
             Vector3 playerDirection = (other.transform.position - transform.position).normalized;
             if (IsDirectionValid(playerDirection))
             {
-                gameCoreManager.PlayerReachedFinishLine();
+                NotifyFinishLineServerRpc(other.GetComponent<NetworkObject>().OwnerClientId);
             }
             else
             {
@@ -57,5 +60,17 @@ public class FinishLine : MonoBehaviour
             return true;
 
         return false;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void NotifyFinishLineServerRpc(ulong clientId)
+    {
+        if (gameCoreManager == null)
+        {
+            Debug.LogError("GameCoreManager reference is missing in FinishLine!");
+            return;
+        }
+
+        gameCoreManager.PlayerReachedFinishLine();
     }
 }

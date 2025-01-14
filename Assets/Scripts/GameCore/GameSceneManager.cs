@@ -1,9 +1,24 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class GameSceneManager : MonoBehaviour
+public class GameSceneManager : NetworkBehaviour
 {
+    public static GameSceneManager Instance;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject); // Ensure only one instance exists
+        }
+    }
+
     [Header("Panels")]
     public GameObject startPanel;
     public GameObject readyPanel;
@@ -12,7 +27,8 @@ public class GameSceneManager : MonoBehaviour
     public GameObject escMenuPanel;
 
     [Header("Ready Panel Components")]
-    public Button readyButton;
+    public Button hostButton;
+    public Button clientButton;
     public Button mainMenuButton;
     public Button exitButton;
     public TMP_Text playerTextReady;
@@ -35,17 +51,34 @@ public class GameSceneManager : MonoBehaviour
     [Header("Game State")]
     public int totalPlayers = 2; // Total players in the game
     public int totalToursRequired = 3; // Number of tours needed to finish
-    private int playersReady = 0;
     private int currentTours = 0;
 
+    private NetworkVariable<int> playersReady = new NetworkVariable<int>(0); // Track ready players
     private bool isGamePaused = true;
 
     private void Start()
     {
         ShowStartPanel();
 
+        Debug.Log("Initializing GameSceneManager...");
+
+        // Verify if NetworkManager is available
+        if (NetworkManager.Singleton == null)
+        {
+            Debug.LogError("NetworkManager is not initialized.");
+            return;
+        }
+
+        // Verify buttons
+        if (hostButton == null || clientButton == null)
+        {
+            Debug.LogError("Host and Client buttons are not assigned.");
+            return;
+        }
+
         // Add button listeners
-        readyButton.onClick.AddListener(OnReadyButtonClicked);
+        hostButton.onClick.AddListener(JoinAsHost);
+        clientButton.onClick.AddListener(JoinAsClient);
         mainMenuButton.onClick.AddListener(ReturnToMainMenu);
         exitButton.onClick.AddListener(ExitGame);
         restartButton.onClick.AddListener(RestartGame);
@@ -54,6 +87,17 @@ public class GameSceneManager : MonoBehaviour
         resetCarButton.onClick.AddListener(ResetCar);
         exitSessionButton.onClick.AddListener(ExitSession);
         exitGameButton.onClick.AddListener(ExitGame);
+
+        // Verify other components
+        if (playerTextReady == null)
+        {
+            Debug.LogError("Player Text Ready is not assigned.");
+            return;
+        }
+
+        playersReady.OnValueChanged += OnPlayersReadyChanged;
+
+        Debug.Log("GameSceneManager initialized successfully.");
     }
 
     private void Update()
@@ -77,7 +121,7 @@ public class GameSceneManager : MonoBehaviour
     {
         SetActivePanel(startPanel);
         PauseGame();
-        playersReady = 0;
+        playersReady.Value = 0;
         currentTours = 0;
     }
 
@@ -85,7 +129,7 @@ public class GameSceneManager : MonoBehaviour
     {
         SetActivePanel(readyPanel);
         PauseGame();
-        playersReady = 0;
+        playersReady.Value = 0;
         UpdateReadyPanelText();
     }
 
@@ -128,16 +172,115 @@ public class GameSceneManager : MonoBehaviour
     #endregion
 
     #region Button Logic
-    public void OnReadyButtonClicked()
-    {
-        playersReady++;
-        UpdateReadyPanelText();
 
-        if (playersReady >= totalPlayers)
+    public void JoinAsHost()
+    {
+        Debug.Log("Starting Host...");
+        if (NetworkManager.Singleton.StartHost())
         {
-            ShowInGamePanel();
+            Debug.Log("Host started successfully.");
+            IncrementReadyCount();
+            ResumeGame();
+        }
+        else
+        {
+            Debug.LogError("Failed to start Host.");
         }
     }
+
+    public void JoinAsClient()
+    {
+        Debug.Log("Starting Client...");
+        if (NetworkManager.Singleton.StartClient())
+        {
+            Debug.Log("Client started successfully.");
+            IncrementReadyCount();
+            ResumeGame();
+        }
+        else
+        {
+            Debug.LogError("Failed to start Client.");
+        }
+    }
+
+
+    private void IncrementReadyCount()
+    {
+        if (NetworkManager.Singleton == null)
+        {
+            Debug.LogError("NetworkManager is not initialized.");
+            return;
+        }
+
+        if (IsServer)
+        {
+            playersReady.Value++; // Increase ready count on the server
+            Debug.Log($"Server incremented ready count: {playersReady.Value}");
+        }
+        else
+        {
+            Debug.Log("Client requesting ready count increment...");
+            NotifyPlayerJoinedServerRpc();
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void NotifyPlayerJoinedServerRpc()
+    {
+        if (NetworkManager.Singleton.IsServer)
+        {
+            if (GameSceneManager.Instance == null)
+            {
+                Debug.LogError("GameSceneManager.Instance is null when attempting to increment ready count!");
+                return;
+            }
+
+            playersReady.Value++;
+            Debug.Log($"Server incremented ready count. Current count: {playersReady.Value}");
+        }
+    }
+
+    private void OnPlayersReadyChanged(int oldValue, int newValue)
+    {
+        Debug.Log($"Ready count changed: {oldValue} -> {newValue}");
+
+        playerTextReady.text = $"Players Ready: {newValue}/{totalPlayers}";
+
+        if (newValue >= totalPlayers)
+        {
+            Debug.Log("All players are ready. Starting the game...");
+            StartGame();
+        }
+    }
+
+    private void StartGame()
+    {
+        Debug.Log("All players have joined. Starting the game...");
+
+        // Deactivate the ready panel and activate in-game UI
+        if (readyPanel != null)
+        {
+            readyPanel.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("Ready Panel is not assigned in GameSceneManager!");
+        }
+
+        if (inGamePanel != null)
+        {
+            inGamePanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("In-Game Panel is not assigned in GameSceneManager!");
+        }
+
+        ResumeGame();
+
+        // Add additional logic to start gameplay if necessary
+    }
+
 
     public void RestartGame()
     {
@@ -164,7 +307,7 @@ public class GameSceneManager : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        playersReady = 0;
+        playersReady.Value = 0;
         currentTours = 0;
         Time.timeScale = 1f;
         Debug.Log("Game reset and returning to main menu.");
@@ -175,7 +318,7 @@ public class GameSceneManager : MonoBehaviour
     #region UI Updates
     private void UpdateReadyPanelText()
     {
-        playerTextReady.text = $"Players Ready: {playersReady}/{totalPlayers}";
+        playerTextReady.text = $"Players Ready: {playersReady.Value}/{totalPlayers}";
     }
 
     public void UpdateInGamePanelText(int currentTours, int totalToursRequired)
@@ -192,7 +335,7 @@ public class GameSceneManager : MonoBehaviour
 
     private void UpdateESCMenuText()
     {
-        playerTextESCMenu.text = $"Players Ready: {playersReady}/{totalPlayers}";
+        playerTextESCMenu.text = $"Players Ready: {playersReady.Value}/{totalPlayers}";
     }
     #endregion
 
