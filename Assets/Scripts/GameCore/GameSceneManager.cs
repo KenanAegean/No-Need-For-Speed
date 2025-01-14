@@ -32,8 +32,11 @@ public class GameSceneManager : MonoBehaviour
     public Button exitGameButton;
     public TMP_Text playerTextESCMenu;
 
+    [Header("Game State")]
+    public int totalPlayers = 2; // Total players in the game
+    public int totalToursRequired = 3; // Number of tours needed to finish
     private int playersReady = 0;
-    private int totalPlayers = 2; // Default to 2 players; can be adjusted for your needs
+    private int currentTours = 0;
 
     private bool isGamePaused = true;
 
@@ -41,14 +44,13 @@ public class GameSceneManager : MonoBehaviour
     {
         ShowStartPanel();
 
-        // Add listeners to buttons
-        readyButton.onClick.AddListener(OnReadyButtonClicked); // Fixed here
+        // Add button listeners
+        readyButton.onClick.AddListener(OnReadyButtonClicked);
         mainMenuButton.onClick.AddListener(ReturnToMainMenu);
         exitButton.onClick.AddListener(ExitGame);
         restartButton.onClick.AddListener(RestartGame);
         menuButton.onClick.AddListener(ReturnToMainMenu);
         exitButtonEnd.onClick.AddListener(ExitGame);
-
         resetCarButton.onClick.AddListener(ResetCar);
         exitSessionButton.onClick.AddListener(ExitSession);
         exitGameButton.onClick.AddListener(ExitGame);
@@ -70,17 +72,20 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
+    #region Panel Management
     public void ShowStartPanel()
     {
         SetActivePanel(startPanel);
         PauseGame();
+        playersReady = 0;
+        currentTours = 0;
     }
 
     public void ShowReadyPanel()
     {
         SetActivePanel(readyPanel);
         PauseGame();
-        playersReady = 0; // Reset ready count
+        playersReady = 0;
         UpdateReadyPanelText();
     }
 
@@ -88,24 +93,18 @@ public class GameSceneManager : MonoBehaviour
     {
         SetActivePanel(inGamePanel);
         ResumeGame();
-        UpdateInGamePanelText();
+        UpdateInGamePanelText(currentTours, totalToursRequired);
     }
 
     public void ShowEndGamePanel()
     {
-        ShowEndGamePanel("Default Winner");
-    }
-
-    public void ShowEndGamePanel(string winner)
-    {
         SetActivePanel(endGamePanel);
         PauseGame();
-        winnerText.text = $"Winner: {winner}";
+        winnerText.text = "Game Over!";
     }
 
     public void ShowESCMenuPanel()
     {
-        inGamePanel.SetActive(false);
         escMenuPanel.SetActive(true);
         UpdateESCMenuText();
     }
@@ -113,6 +112,7 @@ public class GameSceneManager : MonoBehaviour
     public void HideESCMenuPanel()
     {
         escMenuPanel.SetActive(false);
+        inGamePanel.SetActive(true);
     }
 
     private void SetActivePanel(GameObject panel)
@@ -125,36 +125,23 @@ public class GameSceneManager : MonoBehaviour
 
         panel.SetActive(true);
     }
+    #endregion
 
+    #region Button Logic
     public void OnReadyButtonClicked()
     {
         playersReady++;
         UpdateReadyPanelText();
 
-        // If all players are ready, start the game
         if (playersReady >= totalPlayers)
         {
             ShowInGamePanel();
         }
     }
 
-    private void UpdateReadyPanelText()
-    {
-        playerTextReady.text = $"Players Ready: {playersReady}/{totalPlayers}";
-    }
-
-    private void UpdateInGamePanelText()
-    {
-        playerTextInGame.text = $"Game In Progress...";
-    }
-
-    private void UpdateESCMenuText()
-    {
-        playerTextESCMenu.text = $"Players Ready: {playersReady}/{totalPlayers}";
-    }
-
     public void RestartGame()
     {
+        currentTours = 0;
         ShowReadyPanel();
     }
 
@@ -167,7 +154,6 @@ public class GameSceneManager : MonoBehaviour
     public void ExitSession()
     {
         Debug.Log("Exit session logic triggered.");
-        // Add your exit session logic here
         ReturnToMainMenu();
     }
 
@@ -176,6 +162,41 @@ public class GameSceneManager : MonoBehaviour
         Application.Quit();
     }
 
+    public void ReturnToMainMenu()
+    {
+        playersReady = 0;
+        currentTours = 0;
+        Time.timeScale = 1f;
+        Debug.Log("Game reset and returning to main menu.");
+        ShowStartPanel();
+    }
+    #endregion
+
+    #region UI Updates
+    private void UpdateReadyPanelText()
+    {
+        playerTextReady.text = $"Players Ready: {playersReady}/{totalPlayers}";
+    }
+
+    public void UpdateInGamePanelText(int currentTours, int totalToursRequired)
+    {
+        if (playerTextInGame != null)
+        {
+            playerTextInGame.text = $"Game In Progress... Tours: {currentTours}/{totalToursRequired}";
+        }
+        else
+        {
+            Debug.LogError("Player Text In Game is not assigned in GameSceneManager!");
+        }
+    }
+
+    private void UpdateESCMenuText()
+    {
+        playerTextESCMenu.text = $"Players Ready: {playersReady}/{totalPlayers}";
+    }
+    #endregion
+
+    #region Game State
     private void PauseGame()
     {
         Time.timeScale = 0f;
@@ -187,17 +208,5 @@ public class GameSceneManager : MonoBehaviour
         Time.timeScale = 1f;
         isGamePaused = false;
     }
-
-    public void ReturnToMainMenu()
-    {
-        // Reset the game state (e.g., scores, player ready counts, etc.)
-        playersReady = 0; // Reset ready count
-        Time.timeScale = 1f; // Ensure the game is running
-
-        // Perform any other game-specific reset logic here
-        Debug.Log("Game reset and returning to main menu.");
-
-        // Show the Start Panel
-        ShowStartPanel();
-    }
+    #endregion
 }
