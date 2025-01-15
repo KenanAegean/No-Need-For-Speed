@@ -63,18 +63,18 @@ public class PlayerSpawner : MonoBehaviour
         // Handle camera assignment on the local client
         if (clientId == NetworkManager.Singleton.LocalClientId)
         {
-            StartCoroutine(AssignCameraToPlayer(player));
+           // StartCoroutine(AssignCameraToPlayer(player));
         }
         else
         {
             Debug.Log($"Problem for {player.name}.");
-            StartCoroutine(AssignCameraToPlayer(player));
+            //StartCoroutine(AssignCameraToPlayer(player));
         }
     }
 
     private IEnumerator AssignCameraToPlayer(GameObject player)
     {
-        yield return null; // Wait a frame to ensure initialization
+        yield return new WaitForEndOfFrame(); // Ensure the player object is fully initialized
 
         // Find the Cinemachine Virtual Camera
         var vcam = FindObjectOfType<CinemachineCamera>();
@@ -84,18 +84,24 @@ public class PlayerSpawner : MonoBehaviour
             yield break;
         }
 
-        // Assign the player's transform as the target for the camera
-        if (player != null && player.GetComponent<NetworkObject>().IsLocalPlayer)
+        // Check if this is the local player
+        var networkObject = player.GetComponent<NetworkObject>();
+        if (networkObject != null && networkObject.IsLocalPlayer)
         {
             Transform cameraTarget = player.transform;
-            vcam.Target.TrackingTarget = cameraTarget;
+            vcam.Target.TrackingTarget = cameraTarget; // Assign target
             Debug.Log($"Camera target assigned to {player.name}.");
         }
         else
         {
-            Debug.LogError("Player not found or not the local player.");
+            Transform cameraTarget = player.transform;
+            vcam.Target.TrackingTarget = cameraTarget; // Assign target
+            Debug.LogError("Player not found or not the local player .");
+            Debug.Log($"{networkObject.name}.");
+            Debug.Log($"{player.name}.");
         }
     }
+
 
     private void OnDestroy()
     {
