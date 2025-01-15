@@ -1,7 +1,8 @@
 using UnityEngine;
 using Unity.Cinemachine;
+using Unity.Netcode;
 
-public class AutoAddPlayerToVcamTargets : MonoBehaviour
+public class AutoAddPlayerToVcamTargets : NetworkBehaviour
 {
     [TagField]
     public string Tag = string.Empty;
@@ -10,7 +11,11 @@ public class AutoAddPlayerToVcamTargets : MonoBehaviour
 
     void Update()
     {
-        SetCamera();
+        if (IsOwner)
+        {
+            SetCamera(); 
+        }
+        
     }
     
     // Start is called before the first frame update

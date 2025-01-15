@@ -1,6 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 using Unity.Cinemachine;
+using System.Collections;
 
 public class PlayerSpawner : MonoBehaviour
 {
@@ -12,8 +13,6 @@ public class PlayerSpawner : MonoBehaviour
 
     private void Start()
     {
-
-
         if (NetworkManager.Singleton == null)
         {
             Debug.LogError("NetworkManager is not initialized.");
@@ -32,36 +31,69 @@ public class PlayerSpawner : MonoBehaviour
             return;
         }
 
-        NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayer;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+    }
+
+    private void OnClientConnected(ulong clientId)
+    {
+        if (NetworkManager.Singleton.IsServer)
+        {
+            // Server spawns the player
+            SpawnPlayer(clientId);
+            Debug.Log($"Client Connceted");
+        }
     }
 
     private void SpawnPlayer(ulong clientId)
     {
-        if (NetworkManager.Singleton.IsServer)
+        if (spawnPoints == null || spawnPoints.Length == 0 || playerPrefabs == null || playerPrefabs.Length == 0)
         {
-            // Ensure spawn points and prefabs are set
-            if (spawnPoints == null || spawnPoints.Length == 0 || playerPrefabs == null || playerPrefabs.Length == 0)
-            {
-                Debug.LogError("Spawn points or player prefabs are not assigned.");
-                return;
-            }
+            Debug.LogError("Spawn points or player prefabs are not assigned.");
+            return;
+        }
 
-            // Choose the spawn point and player prefab based on clientId
-            Transform spawnPoint = spawnPoints[(int)(clientId % (ulong)spawnPoints.Length)];
-            GameObject playerPrefab = playerPrefabs[(int)(clientId % (ulong)playerPrefabs.Length)];
+        // Determine the spawn point and prefab
+        Transform spawnPoint = spawnPoints[(int)(clientId % (ulong)spawnPoints.Length)];
+        GameObject playerPrefab = playerPrefabs[(int)(clientId % (ulong)playerPrefabs.Length)];
 
-            // Spawn the player
-            GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
-            player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+        // Instantiate the player and spawn it on the network
+        GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+        player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
 
-            // Set Camera
-            var vcam = GetComponent<CinemachineCamera>();
-            if (vcam != null)
-            {
-                var targets = GameObject.FindGameObjectsWithTag("Player");
-                if (targets.Length > 0)
-                    vcam.Target.TrackingTarget = targets[0].transform;
-            }
+        // Handle camera assignment on the local client
+        if (clientId == NetworkManager.Singleton.LocalClientId)
+        {
+            StartCoroutine(AssignCameraToPlayer(player));
+        }
+        else
+        {
+            Debug.Log($"Problem for {player.name}.");
+            StartCoroutine(AssignCameraToPlayer(player));
+        }
+    }
+
+    private IEnumerator AssignCameraToPlayer(GameObject player)
+    {
+        yield return null; // Wait a frame to ensure initialization
+
+        // Find the Cinemachine Virtual Camera
+        var vcam = FindObjectOfType<CinemachineCamera>();
+        if (vcam == null)
+        {
+            Debug.LogError("No CinemachineCamera found in the scene!");
+            yield break;
+        }
+
+        // Assign the player's transform as the target for the camera
+        if (player != null && player.GetComponent<NetworkObject>().IsLocalPlayer)
+        {
+            Transform cameraTarget = player.transform;
+            vcam.Target.TrackingTarget = cameraTarget;
+            Debug.Log($"Camera target assigned to {player.name}.");
+        }
+        else
+        {
+            Debug.LogError("Player not found or not the local player.");
         }
     }
 
@@ -69,7 +101,7 @@ public class PlayerSpawner : MonoBehaviour
     {
         if (NetworkManager.Singleton != null)
         {
-            NetworkManager.Singleton.OnClientConnectedCallback -= SpawnPlayer;
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
         }
     }
 }
