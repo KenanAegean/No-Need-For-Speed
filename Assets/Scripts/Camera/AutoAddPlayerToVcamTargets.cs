@@ -4,7 +4,7 @@ using System.Collections;
 
 public class AutoAddPlayerToVcamTargets : MonoBehaviour
 {
-    private bool isTargetFound = false;
+    public bool isTargetFound = false;
 
 
     void Update()
@@ -15,7 +15,6 @@ public class AutoAddPlayerToVcamTargets : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
     void Start()
     {
 
