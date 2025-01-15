@@ -175,6 +175,7 @@ public class GameSceneManager : NetworkBehaviour
 
     public void JoinAsHost()
     {
+        ResumeGame();
         Debug.Log("Starting Host...");
         if (NetworkManager.Singleton.StartHost())
         {
@@ -186,10 +187,12 @@ public class GameSceneManager : NetworkBehaviour
         {
             Debug.LogError("Failed to start Host.");
         }
+        readyPanel.SetActive(false);// delete later
     }
 
     public void JoinAsClient()
     {
+        ResumeGame();
         Debug.Log("Starting Client...");
         if (NetworkManager.Singleton.StartClient())
         {
@@ -201,6 +204,7 @@ public class GameSceneManager : NetworkBehaviour
         {
             Debug.LogError("Failed to start Client.");
         }
+        readyPanel.SetActive(false); //delete later
     }
 
 
