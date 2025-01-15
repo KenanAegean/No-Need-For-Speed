@@ -21,17 +21,16 @@ public class GameSceneManager : NetworkBehaviour
 
     [Header("Panels")]
     public GameObject startPanel;
-    public GameObject readyPanel;
+    public GameObject joinPanel;
     public GameObject inGamePanel;
     public GameObject endGamePanel;
     public GameObject escMenuPanel;
 
-    [Header("Ready Panel Components")]
+    [Header("Join Panel Components")]
     public Button hostButton;
     public Button clientButton;
     public Button mainMenuButton;
     public Button exitButton;
-    public TMP_Text playerTextReady;
 
     [Header("In Game Panel Components")]
     public TMP_Text playerTextInGame;
@@ -53,7 +52,6 @@ public class GameSceneManager : NetworkBehaviour
     public int totalToursRequired = 3; // Number of tours needed to finish
     private int currentTours = 0;
 
-    private NetworkVariable<int> playersReady = new NetworkVariable<int>(0); // Track ready players
     private bool isGamePaused = true;
 
     private void Start()
@@ -88,12 +86,7 @@ public class GameSceneManager : NetworkBehaviour
         exitSessionButton.onClick.AddListener(ExitSession);
         exitGameButton.onClick.AddListener(ExitGame);
 
-        // Verify other components
-        if (playerTextReady == null)
-        {
-            Debug.LogError("Player Text Ready is not assigned.");
-            return;
-        }
+
 
         Debug.Log("GameSceneManager initialized successfully.");
     }
@@ -119,16 +112,13 @@ public class GameSceneManager : NetworkBehaviour
     {
         SetActivePanel(startPanel);
         PauseGame();
-        playersReady.Value = 0;
         currentTours = 0;
     }
 
-    public void ShowReadyPanel()
+    public void ShowJoinPanel()
     {
-        SetActivePanel(readyPanel);
+        SetActivePanel(joinPanel);
         PauseGame();
-        playersReady.Value = 0;
-        UpdateReadyPanelText();
     }
 
     public void ShowInGamePanel()
@@ -147,6 +137,7 @@ public class GameSceneManager : NetworkBehaviour
 
     public void ShowESCMenuPanel()
     {
+        inGamePanel.SetActive(false);
         escMenuPanel.SetActive(true);
         UpdateESCMenuText();
     }
@@ -160,7 +151,7 @@ public class GameSceneManager : NetworkBehaviour
     private void SetActivePanel(GameObject panel)
     {
         startPanel.SetActive(false);
-        readyPanel.SetActive(false);
+        joinPanel.SetActive(false);
         inGamePanel.SetActive(false);
         endGamePanel.SetActive(false);
         escMenuPanel.SetActive(false);
@@ -178,14 +169,14 @@ public class GameSceneManager : NetworkBehaviour
         if (NetworkManager.Singleton.StartHost())
         {
             Debug.Log("Host started successfully.");
-            readyPanel.SetActive(false);
+            joinPanel.SetActive(false);
             StartGame();
         }
         else
         {
             Debug.LogError("Failed to start Host.");
         }
-        //readyPanel.SetActive(false);// delete later
+        //joinPanel.SetActive(false);// delete later
     }
 
     public void JoinAsClient()
@@ -195,14 +186,14 @@ public class GameSceneManager : NetworkBehaviour
         if (NetworkManager.Singleton.StartClient())
         {
             Debug.Log("Client started successfully.");
-            readyPanel.SetActive(false);
+            joinPanel.SetActive(false);
             StartGame();
         }
         else
         {
             Debug.LogError("Failed to start Client.");
         }
-        readyPanel.SetActive(false); //delete later
+        joinPanel.SetActive(false); //delete later
     }
 
 
@@ -212,14 +203,14 @@ public class GameSceneManager : NetworkBehaviour
     {
         Debug.Log("All players have joined. Starting the game...");
 
-        // Deactivate the ready panel and activate in-game UI
-        if (readyPanel != null)
+        // Deactivate the join panel and activate in-game UI
+        if (joinPanel != null)
         {
-            readyPanel.SetActive(false);
+            joinPanel.SetActive(false);
         }
         else
         {
-            Debug.LogError("Ready Panel is not assigned in GameSceneManager!");
+            Debug.LogError("Join Panel is not assigned in GameSceneManager!");
         }
 
         if (inGamePanel != null)
@@ -240,7 +231,7 @@ public class GameSceneManager : NetworkBehaviour
     public void RestartGame()
     {
         currentTours = 0;
-        ShowReadyPanel();
+        ShowJoinPanel();
     }
 
     public void ResetCar()
@@ -262,7 +253,6 @@ public class GameSceneManager : NetworkBehaviour
 
     public void ReturnToMainMenu()
     {
-        playersReady.Value = 0;
         currentTours = 0;
         Time.timeScale = 1f;
         Debug.Log("Game reset and returning to main menu.");
@@ -271,10 +261,6 @@ public class GameSceneManager : NetworkBehaviour
     #endregion
 
     #region UI Updates
-    private void UpdateReadyPanelText()
-    {
-        playerTextReady.text = $"Players Ready: {playersReady.Value}/{totalPlayers}";
-    }
 
     public void UpdateInGamePanelText(int currentTours, int totalToursRequired)
     {
@@ -290,7 +276,7 @@ public class GameSceneManager : NetworkBehaviour
 
     private void UpdateESCMenuText()
     {
-        playerTextESCMenu.text = $"Players Ready: {playersReady.Value}/{totalPlayers}";
+        //add logic
     }
     #endregion
 

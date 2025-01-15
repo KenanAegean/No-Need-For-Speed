@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using Unity.Cinemachine;
 
 public class PlayerSpawner : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class PlayerSpawner : MonoBehaviour
 
     private void Start()
     {
+
+
         if (NetworkManager.Singleton == null)
         {
             Debug.LogError("NetworkManager is not initialized.");
@@ -50,6 +53,15 @@ public class PlayerSpawner : MonoBehaviour
             // Spawn the player
             GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
             player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+
+            // Set Camera
+            var vcam = GetComponent<CinemachineCamera>();
+            if (vcam != null)
+            {
+                var targets = GameObject.FindGameObjectsWithTag("Player");
+                if (targets.Length > 0)
+                    vcam.Target.TrackingTarget = targets[0].transform;
+            }
         }
     }
 
