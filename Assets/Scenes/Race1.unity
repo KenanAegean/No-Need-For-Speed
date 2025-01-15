@@ -93,7 +93,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 23dd1fb74eaa07b4a9c6b9e68208e824, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -1895,6 +1895,7 @@ GameObject:
   - component: {fileID: 236498591}
   - component: {fileID: 236498590}
   - component: {fileID: 236498594}
+  - component: {fileID: 236498595}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2052,6 +2053,15 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!45 &236498595
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 236498589}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: aeab33f69c199e54794f516d31450ec4, type: 2}
 --- !u!1 &239049867
 GameObject:
   m_ObjectHideFlags: 0
@@ -8994,7 +9004,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &836268504
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9734,7 +9744,7 @@ Light:
   serializedVersion: 11
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.7
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -24153,6 +24163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f1547a1c9a4aee4280578803d81c2d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isTargetFound: 0
 --- !u!4 &5953902932196294409 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2616277790610339171, guid: b94342e709204834b985ec4823aa5081, type: 3}

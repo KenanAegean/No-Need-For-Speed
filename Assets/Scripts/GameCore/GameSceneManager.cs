@@ -174,7 +174,7 @@ public class GameSceneManager : NetworkBehaviour
         }
         else
         {
-            Debug.LogError("Failed to start Host.");
+            //Debug.LogError("Failed to start Host.");
         }
         //joinPanel.SetActive(false);// delete later
     }
@@ -191,7 +191,7 @@ public class GameSceneManager : NetworkBehaviour
         }
         else
         {
-            Debug.LogError("Failed to start Client.");
+            //Debug.LogError("Failed to start Client.");
         }
         joinPanel.SetActive(false); //delete later
     }

@@ -15,6 +15,9 @@ public class PlayerController : NetworkBehaviour
 
     private Rigidbody rb;
 
+    [Header("HELLO Text")]
+    public GameObject helloText; // Assign the "HELLO" text GameObject in the Inspector.
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -35,6 +38,12 @@ public class PlayerController : NetworkBehaviour
         // Get input from the old input system.
         moveInput = Input.GetAxis("Vertical");
         turnInput = Input.GetAxis("Horizontal");
+
+        // Show "HELLO" text when pressing "E"
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            ShowHelloTextServerRpc();
+        }
     }
 
     private void FixedUpdate()
@@ -71,6 +80,34 @@ public class PlayerController : NetworkBehaviour
         if (Mathf.Approximately(moveInput, 0))
         {
             rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, brakeForce * Time.fixedDeltaTime);
+        }
+    }
+
+    [ServerRpc]
+    private void ShowHelloTextServerRpc()
+    {
+        ShowHelloTextClientRpc();
+    }
+
+    [ClientRpc]
+    private void ShowHelloTextClientRpc()
+    {
+        if (helloText != null)
+        {
+            helloText.SetActive(true);
+            Invoke(nameof(HideHelloText), 2f); // Hide after 2 seconds
+        }
+        else
+        {
+            Debug.LogWarning("Hello Text is not assigned to PlayerController.");
+        }
+    }
+
+    private void HideHelloText()
+    {
+        if (helloText != null)
+        {
+            helloText.SetActive(false);
         }
     }
 }

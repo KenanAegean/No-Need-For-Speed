@@ -31,7 +31,6 @@ public class AutoAddPlayerToVcamTargets : MonoBehaviour
             {
                 var targets = GameObject.FindGameObjectsWithTag("Player2");
                 if (targets.Length > 0)
-                    //vcam.LookAt = vcam.Follow = targets[0].transform;
                     vcam.Target.TrackingTarget = targets[0].transform;
             }
             isTargetFound = true;
@@ -43,7 +42,6 @@ public class AutoAddPlayerToVcamTargets : MonoBehaviour
             {
                 var targets = GameObject.FindGameObjectsWithTag("Player");
                 if (targets.Length > 0)
-                    //vcam.LookAt = vcam.Follow = targets[0].transform;
                     vcam.Target.TrackingTarget = targets[0].transform;
             }
             isTargetFound = true;

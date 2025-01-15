@@ -60,46 +60,6 @@ public class PlayerSpawner : MonoBehaviour
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
 
-        // Handle camera assignment on the local client
-        if (clientId == NetworkManager.Singleton.LocalClientId)
-        {
-           // StartCoroutine(AssignCameraToPlayer(player));
-        }
-        else
-        {
-            Debug.Log($"Problem for {player.name}.");
-            //StartCoroutine(AssignCameraToPlayer(player));
-        }
-    }
-
-    private IEnumerator AssignCameraToPlayer(GameObject player)
-    {
-        yield return new WaitForEndOfFrame(); // Ensure the player object is fully initialized
-
-        // Find the Cinemachine Virtual Camera
-        var vcam = FindObjectOfType<CinemachineCamera>();
-        if (vcam == null)
-        {
-            Debug.LogError("No CinemachineCamera found in the scene!");
-            yield break;
-        }
-
-        // Check if this is the local player
-        var networkObject = player.GetComponent<NetworkObject>();
-        if (networkObject != null && networkObject.IsLocalPlayer)
-        {
-            Transform cameraTarget = player.transform;
-            vcam.Target.TrackingTarget = cameraTarget; // Assign target
-            Debug.Log($"Camera target assigned to {player.name}.");
-        }
-        else
-        {
-            Transform cameraTarget = player.transform;
-            vcam.Target.TrackingTarget = cameraTarget; // Assign target
-            Debug.LogError("Player not found or not the local player .");
-            Debug.Log($"{networkObject.name}.");
-            Debug.Log($"{player.name}.");
-        }
     }
 
 
