@@ -95,8 +95,6 @@ public class GameSceneManager : NetworkBehaviour
             return;
         }
 
-        playersReady.OnValueChanged += OnPlayersReadyChanged;
-
         Debug.Log("GameSceneManager initialized successfully.");
     }
 
@@ -175,30 +173,30 @@ public class GameSceneManager : NetworkBehaviour
 
     public void JoinAsHost()
     {
-        ResumeGame();
+        //ResumeGame();
         Debug.Log("Starting Host...");
         if (NetworkManager.Singleton.StartHost())
         {
             Debug.Log("Host started successfully.");
-            IncrementReadyCount();
-            ResumeGame();
+            readyPanel.SetActive(false);
+            StartGame();
         }
         else
         {
             Debug.LogError("Failed to start Host.");
         }
-        readyPanel.SetActive(false);// delete later
+        //readyPanel.SetActive(false);// delete later
     }
 
     public void JoinAsClient()
     {
-        ResumeGame();
+        //ResumeGame();
         Debug.Log("Starting Client...");
         if (NetworkManager.Singleton.StartClient())
         {
             Debug.Log("Client started successfully.");
-            IncrementReadyCount();
-            ResumeGame();
+            readyPanel.SetActive(false);
+            StartGame();
         }
         else
         {
@@ -208,54 +206,7 @@ public class GameSceneManager : NetworkBehaviour
     }
 
 
-    private void IncrementReadyCount()
-    {
-        if (NetworkManager.Singleton == null)
-        {
-            Debug.LogError("NetworkManager is not initialized.");
-            return;
-        }
-
-        if (IsServer)
-        {
-            playersReady.Value++; // Increase ready count on the server
-            Debug.Log($"Server incremented ready count: {playersReady.Value}");
-        }
-        else
-        {
-            Debug.Log("Client requesting ready count increment...");
-            NotifyPlayerJoinedServerRpc();
-        }
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void NotifyPlayerJoinedServerRpc()
-    {
-        if (NetworkManager.Singleton.IsServer)
-        {
-            if (GameSceneManager.Instance == null)
-            {
-                Debug.LogError("GameSceneManager.Instance is null when attempting to increment ready count!");
-                return;
-            }
-
-            playersReady.Value++;
-            Debug.Log($"Server incremented ready count. Current count: {playersReady.Value}");
-        }
-    }
-
-    private void OnPlayersReadyChanged(int oldValue, int newValue)
-    {
-        Debug.Log($"Ready count changed: {oldValue} -> {newValue}");
-
-        playerTextReady.text = $"Players Ready: {newValue}/{totalPlayers}";
-
-        if (newValue >= totalPlayers)
-        {
-            Debug.Log("All players are ready. Starting the game...");
-            StartGame();
-        }
-    }
+    
 
     private void StartGame()
     {
