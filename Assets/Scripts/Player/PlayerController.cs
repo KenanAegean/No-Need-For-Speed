@@ -5,18 +5,22 @@ using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
     [Header("Car Settings")]
-    public float acceleration = 10000f; // Forward acceleration force.
-    public float maxSpeed = 20f; // Maximum speed.
-    public float turnSpeed = 50f; // Turning speed.
-    public float brakeForce = 10f; // Braking force.
+    public float acceleration = 10000f;
+    public float maxSpeed = 20f;
+    public float turnSpeed = 50f;
+    public float brakeForce = 10f;
 
-    private float moveInput; // Forward/backward input.
-    private float turnInput; // Left/right input.
+    private float moveInput;
+    private float turnInput;
 
     private Rigidbody rb;
 
-    [Header("HELLO Text")]
-    public GameObject helloText; // Assign the "HELLO" text GameObject in the Inspector.
+    [Header("Emote System")]
+    public Transform emoteContainer; // Assign the EmoteContainer in the Inspector.
+
+    [Header("Model Management")]
+    public Transform modelContainer;
+    private int lastModelIndex = -1;
 
     private void Awake()
     {
@@ -35,14 +39,19 @@ public class PlayerController : NetworkBehaviour
         // Allow only the owner of this player object to control it
         if (!IsOwner) return;
 
-        // Get input from the old input system.
+        // Get input
         moveInput = Input.GetAxis("Vertical");
         turnInput = Input.GetAxis("Horizontal");
 
-        // Show "HELLO" text when pressing "E"
+        // Show random emote on "E" press
         if (Input.GetKeyDown(KeyCode.E))
         {
-            ShowHelloTextServerRpc();
+            ShowRandomEmoteServerRpc();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            ChangeModelServerRpc();
         }
     }
 
@@ -56,58 +65,109 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleMovement()
     {
-        // Forward/Backward movement.
-        if (Mathf.Abs(moveInput) > 0.1f) // Only apply force if there is input.
+        if (Mathf.Abs(moveInput) > 0.1f)
         {
             Vector3 force = transform.forward * (moveInput * acceleration);
             rb.AddForce(force);
 
-            // Clamp speed.
             if (rb.linearVelocity.magnitude > maxSpeed)
             {
                 rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
             }
         }
 
-        // Steering.
-        if (Mathf.Abs(turnInput) > 0.1f) // Only turn if there is input.
+        if (Mathf.Abs(turnInput) > 0.1f)
         {
             float steerAmount = turnInput * turnSpeed * Time.fixedDeltaTime;
             transform.Rotate(0f, steerAmount, 0f);
         }
 
-        // Apply brakes if no forward/backward input is given.
         if (Mathf.Approximately(moveInput, 0))
         {
             rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, brakeForce * Time.fixedDeltaTime);
         }
     }
 
-    [ServerRpc]
-    private void ShowHelloTextServerRpc()
+    public void ChangeModelOnPit()
     {
-        ShowHelloTextClientRpc();
+        if (IsOwner)
+        {
+            ChangeModelServerRpc();
+        }
+    }
+
+    [ServerRpc]
+    private void ChangeModelServerRpc()
+    {
+        int newModelIndex = GetRandomModelIndex();
+        ActivateModelClientRpc(newModelIndex);
+    }
+
+    private int GetRandomModelIndex()
+    {
+        int randomIndex;
+
+        do
+        {
+            randomIndex = Random.Range(0, modelContainer.childCount);
+        } while (randomIndex == lastModelIndex); // Ensure a different model is selected
+
+        lastModelIndex = randomIndex; // Update the last selected model index
+        return randomIndex;
     }
 
     [ClientRpc]
-    private void ShowHelloTextClientRpc()
+    private void ActivateModelClientRpc(int modelIndex)
     {
-        if (helloText != null)
+        // Deactivate all models
+        foreach (Transform model in modelContainer)
         {
-            helloText.SetActive(true);
-            Invoke(nameof(HideHelloText), 2f); // Hide after 2 seconds
+            model.gameObject.SetActive(false);
         }
-        else
+
+        // Activate the selected model
+        if (modelContainer.childCount > modelIndex)
         {
-            Debug.LogWarning("Hello Text is not assigned to PlayerController.");
+            Transform selectedModel = modelContainer.GetChild(modelIndex);
+            selectedModel.gameObject.SetActive(true);
         }
     }
 
-    private void HideHelloText()
+    [ServerRpc]
+    private void ShowRandomEmoteServerRpc()
     {
-        if (helloText != null)
+        int emoteIndex = Random.Range(0, emoteContainer.childCount);
+        ShowEmoteClientRpc(emoteIndex);
+    }
+
+    [ClientRpc]
+    private void ShowEmoteClientRpc(int emoteIndex)
+    {
+        if (emoteContainer != null)
         {
-            helloText.SetActive(false);
+            // Deactivate all emotes
+            foreach (Transform emote in emoteContainer)
+            {
+                emote.gameObject.SetActive(false);
+            }
+
+            // Activate the selected emote
+            Transform selectedEmote = emoteContainer.GetChild(emoteIndex);
+            selectedEmote.gameObject.SetActive(true);
+
+            // Hide the emote after 2 seconds
+            Invoke(nameof(HideEmotes), 2f);
+        }
+    }
+
+    private void HideEmotes()
+    {
+        if (emoteContainer != null)
+        {
+            foreach (Transform emote in emoteContainer)
+            {
+                emote.gameObject.SetActive(false);
+            }
         }
     }
 }
