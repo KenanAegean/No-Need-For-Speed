@@ -279,9 +279,15 @@ public class GameSceneManager : NetworkBehaviour
     {
         if (playerTextInGame != null)
         {
+            Debug.Log($"Updating UI: {playerName} - Tours: {currentTours}/{totalTours}");
             playerTextInGame.text = $"{playerName}: {currentTours}/{totalTours}";
         }
+        else
+        {
+            Debug.LogError("playerTextInGame is not assigned in GameSceneManager!");
+        }
     }
+
 
     public void ShowWinner(string winnerName)
     {

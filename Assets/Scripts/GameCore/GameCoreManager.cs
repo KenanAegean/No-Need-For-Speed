@@ -124,6 +124,32 @@ public class GameCoreManager : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    private void UpdatePlayerToursClientRpc(ulong networkObjectId, int toursCompleted, ClientRpcParams clientRpcParams = default)
+    {
+        Debug.Log($"[ClientRpc] Updating tours for Player {networkObjectId}: {toursCompleted} tours completed.");
+        if (NetworkManager.Singleton.LocalClientId == networkObjectId) // Ensure only the local client updates their UI
+        {
+            string playerName = GetNetworkName(networkObjectId);
+            gameSceneManager.UpdatePlayerTourText(playerName, toursCompleted, totalToursRequired);
+        }
+    }
+
+    [ClientRpc]
+    private void UpdateTourTextClientRpc(ulong networkObjectId, int currentTours, int totalTours)
+    {
+        var networkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjectId];
+        if (networkObject != null)
+        {
+            // Find the TextMeshPro component
+            var tourText = networkObject.transform.Find("TourCounter")?.GetComponent<TMPro.TextMeshPro>();
+            if (tourText != null)
+            {
+                tourText.text = $"Tour: {currentTours}/{totalTours}";
+            }
+        }
+    }
+
     public void PlayerReachedFinishLine(ulong networkObjectId, bool isNpc)
     {
         if (isNpc)
@@ -136,7 +162,9 @@ public class GameCoreManager : NetworkBehaviour
             npcTours[networkObjectId]++;
             Debug.Log($"NPC {networkObjectId} completed a tour! ({npcTours[networkObjectId]}/{totalToursRequired})");
 
-
+            // Update the NPC's text
+            UpdateTourTextClientRpc(networkObjectId, npcTours[networkObjectId], totalToursRequired);
+            
             // Check for game over
             if (npcTours[networkObjectId] >= totalToursRequired)
             {
@@ -154,8 +182,8 @@ public class GameCoreManager : NetworkBehaviour
             playerTours[networkObjectId]++;
             Debug.Log($"Player {networkObjectId} completed a tour! ({playerTours[networkObjectId]}/{totalToursRequired})");
 
-            // Update UI for players
-            UpdatePlayerToursClientRpc(networkObjectId, playerTours[networkObjectId]);
+            // Update the player's text
+            UpdateTourTextClientRpc(networkObjectId, playerTours[networkObjectId], totalToursRequired);
 
             // Check for game over
             if (playerTours[networkObjectId] >= totalToursRequired)
@@ -164,13 +192,6 @@ public class GameCoreManager : NetworkBehaviour
                 ShowWinnerClientRpc(networkObjectId, false);
             }
         }
-    }
-
-    [ClientRpc]
-    private void UpdatePlayerToursClientRpc(ulong networkObjectId, int toursCompleted)
-    {
-        string playerName = GetNetworkName(networkObjectId);
-        gameSceneManager.UpdatePlayerTourText(playerName, toursCompleted, totalToursRequired);
     }
 
 
