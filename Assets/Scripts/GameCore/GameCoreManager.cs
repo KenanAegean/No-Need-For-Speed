@@ -16,6 +16,7 @@ public class GameCoreManager : NetworkBehaviour
     public NetworkVariable<int> totalPlayers = new NetworkVariable<int>(0);
 
     private Dictionary<ulong, int> playerTours = new Dictionary<ulong, int>();
+    private Dictionary<ulong, int> npcTours = new Dictionary<ulong, int>();
 
     [SerializeField] private TMP_Text readyText;
     [SerializeField] private TMP_Text countdownText;
@@ -123,24 +124,47 @@ public class GameCoreManager : NetworkBehaviour
         }
     }
 
-    public void PlayerReachedFinishLine(ulong clientId)
+    public void PlayerReachedFinishLine(ulong networkObjectId, bool isNpc)
     {
-        if (!playerTours.ContainsKey(clientId))
+        if (isNpc)
         {
-            playerTours[clientId] = 0;
+            if (!npcTours.ContainsKey(networkObjectId))
+            {
+                npcTours[networkObjectId] = 0;
+            }
+
+            npcTours[networkObjectId]++;
+            Debug.Log($"NPC {networkObjectId} completed a tour! ({npcTours[networkObjectId]}/{totalToursRequired})");
+
+            // Update UI for NPC tours if needed
+            UpdateNpcToursClientRpc(networkObjectId, npcTours[networkObjectId]);
+
+            // Check for game over
+            if (npcTours[networkObjectId] >= totalToursRequired)
+            {
+                Debug.Log($"Game over! NPC {networkObjectId} wins!");
+                ShowWinnerClientRpc(networkObjectId, true);
+            }
         }
-
-        playerTours[clientId]++;
-        Debug.Log($"Player {clientId} completed a tour! ({playerTours[clientId]}/{totalToursRequired})");
-
-        // Update UI for all clients
-        UpdatePlayerToursClientRpc(clientId, playerTours[clientId]);
-
-        // Check for game over
-        if (playerTours[clientId] >= totalToursRequired)
+        else
         {
-            Debug.Log($"Game over! Player {clientId} wins!");
-            ShowWinnerClientRpc(clientId);
+            if (!playerTours.ContainsKey(networkObjectId))
+            {
+                playerTours[networkObjectId] = 0;
+            }
+
+            playerTours[networkObjectId]++;
+            Debug.Log($"Player {networkObjectId} completed a tour! ({playerTours[networkObjectId]}/{totalToursRequired})");
+
+            // Update UI for players
+            UpdatePlayerToursClientRpc(networkObjectId, playerTours[networkObjectId]);
+
+            // Check for game over
+            if (playerTours[networkObjectId] >= totalToursRequired)
+            {
+                Debug.Log($"Game over! {networkObjectId} wins!");
+                ShowWinnerClientRpc(networkObjectId, false);
+            }
         }
     }
 
@@ -155,11 +179,18 @@ public class GameCoreManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void ShowWinnerClientRpc(ulong clientId)
+    private void UpdateNpcToursClientRpc(ulong npcId, int toursCompleted)
+    {
+        // Logic to update NPC tours UI (optional)
+    }
+
+    [ClientRpc]
+    private void ShowWinnerClientRpc(ulong winnerId, bool isNpc)
     {
         if (gameSceneManager != null)
         {
-            gameSceneManager.ShowWinner(clientId);
+            string winnerType = isNpc ? "NPC" : "Player";
+            gameSceneManager.ShowWinner($"{winnerType} {winnerId}");
         }
     }
 

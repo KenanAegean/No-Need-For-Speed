@@ -283,11 +283,11 @@ public class GameSceneManager : NetworkBehaviour
         }
     }
 
-    public void ShowWinner(ulong winnerClientId)
+    public void ShowWinner(string winnerName)
     {
         if (winnerText != null)
         {
-            winnerText.text = $"Player {winnerClientId} wins the race!";
+            winnerText.text = $"{winnerName} wins the race!";
         }
         ShowEndGamePanel();
     }

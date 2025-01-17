@@ -29,20 +29,21 @@ public class FinishLine : NetworkBehaviour
             var networkObject = other.GetComponent<NetworkObject>();
             if (networkObject == null) return;
 
-            ulong clientId = networkObject.OwnerClientId;
+            ulong networkObjectId = networkObject.NetworkObjectId;
 
             // Check if this is the first time crossing the finish line
-            if (!hasCrossedFinishLine.ContainsKey(clientId))
+            if (!hasCrossedFinishLine.ContainsKey(networkObjectId))
             {
-                hasCrossedFinishLine[clientId] = true;
-                Debug.Log($"Player {clientId} crossed the finish line for the first time.");
+                hasCrossedFinishLine[networkObjectId] = true;
+                Debug.Log($"Entity {networkObjectId} crossed the finish line for the first time.");
                 return; // Skip updating tour count
             }
 
             // Notify GameCoreManager
-            gameCoreManager.PlayerReachedFinishLine(clientId);
+            gameCoreManager.PlayerReachedFinishLine(networkObjectId, other.CompareTag("NPC"));
         }
     }
+
 
     private bool IsDirectionValid(Vector3 playerDirection)
     {
