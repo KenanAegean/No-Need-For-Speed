@@ -18,27 +18,28 @@ public class GameCoreManager : NetworkBehaviour
     [SerializeField] private TMP_Text countdownText;
 
     private bool isCountdownStarted = false;
+    private bool hasPressedReady = false;
 
     private void Start()
     {
         if (IsServer)
         {
-            totalPlayers.Value = 1; // Host is automatically added as a player
+            totalPlayers.Value = 1; // Add the host to the player count
         }
 
+        UpdateReadyCountClientRpc(readyCount.Value, totalPlayers.Value);
         readyText.text = "Press R To Be Ready";
         countdownText.text = "";
     }
 
     private void Update()
     {
-        // Allow only the local player to mark themselves as ready
-        if (IsOwner && Input.GetKeyDown(KeyCode.R) && !isCountdownStarted)
+        if (Input.GetKeyDown(KeyCode.R) && !hasPressedReady && !isCountdownStarted)
         {
+            hasPressedReady = true; // Prevent pressing "R" again
             SetReadyServerRpc();
         }
 
-        // Check if all players are ready on the server
         if (IsServer && readyCount.Value == totalPlayers.Value && !isCountdownStarted)
         {
             StartCountdown();
@@ -46,24 +47,15 @@ public class GameCoreManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void SetReadyServerRpc()
+    private void SetReadyServerRpc(ServerRpcParams rpcParams = default)
     {
         if (readyCount.Value < totalPlayers.Value)
         {
-            readyCount.Value++; // Increment ready count
-        }
-        else if (readyCount.Value > 0)
-        {
-            readyCount.Value--; // Decrement ready count
-        }
-        UpdateReadyCountClientRpc(readyCount.Value, totalPlayers.Value);
-        Debug.Log($"Ready count updated. Ready count: {readyCount.Value}/{totalPlayers.Value}");
-    }
+            readyCount.Value++;
+            UpdateReadyCountClientRpc(readyCount.Value, totalPlayers.Value);
 
-    [ClientRpc]
-    private void UpdateReadyCountClientRpc(int ready, int total)
-    {
-        readyText.text = $"Ready: {ready}/{total}";
+            Debug.Log($"Player {rpcParams.Receive.SenderClientId} is ready. Ready count: {readyCount.Value}/{totalPlayers.Value}");
+        }
     }
 
     private void StartCountdown()
@@ -86,6 +78,12 @@ public class GameCoreManager : NetworkBehaviour
         EnableMovementServerRpc();
         yield return new WaitForSeconds(1f);
         HideCountdownClientRpc();
+    }
+
+    [ClientRpc]
+    private void UpdateReadyCountClientRpc(int ready, int total)
+    {
+        readyText.text = $"Ready: {ready}/{total}";
     }
 
     [ClientRpc]
@@ -119,7 +117,6 @@ public class GameCoreManager : NetworkBehaviour
         {
             npc.ToggleMovementServerRpc();
         }
-
     }
 
     public void PlayerReachedFinishLine()
