@@ -111,18 +111,8 @@ public class GameSceneManager : NetworkBehaviour
     }
     public void ReloadGameSession()
     {
-        if (IsServer)
-        {
-            // Host triggers the reload for all clients
-            ReloadSceneForAllClientsClientRpc(SceneManager.GetActiveScene().name);
-        }
-    }
-
-    [ClientRpc]
-    private void ReloadSceneForAllClientsClientRpc(string sceneName)
-    {
-        // Reload the scene for all clients
-        SceneManager.LoadScene(sceneName);
+        // Reload the currently active scene
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     #region Panel Management
