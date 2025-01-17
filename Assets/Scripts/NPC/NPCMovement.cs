@@ -51,9 +51,17 @@ public class NPCMovement : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void ToggleMovementServerRpc()
+    public void ToggleMovementServerRpc(bool forceStart = false)
     {
-        isMoving = !isMoving; // Toggle movement
+        if (forceStart)
+        {
+            isMoving = true;
+        }
+        else
+        {
+            isMoving = !isMoving;
+        }
+
         UpdateMovementStateClientRpc(isMoving);
     }
 

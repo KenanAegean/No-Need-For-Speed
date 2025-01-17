@@ -115,7 +115,8 @@ public class GameCoreManager : NetworkBehaviour
 
         foreach (var npc in Object.FindObjectsByType<NPCMovement>(FindObjectsSortMode.None))
         {
-            npc.ToggleMovementServerRpc();
+            Debug.Log($"Starting movement for NPC: {npc.gameObject.name}"); // Debug log
+            npc.ToggleMovementServerRpc(true);
         }
     }
 
