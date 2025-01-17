@@ -34,6 +34,8 @@ public class GameSceneManager : NetworkBehaviour
 
     [Header("In Game Panel Components")]
     public TMP_Text playerTextInGame;
+    public TMP_Text readyText;
+    public TMP_Text countdownText;
 
     [Header("End Game Panel Components")]
     public TMP_Text winnerText;
@@ -272,6 +274,16 @@ public class GameSceneManager : NetworkBehaviour
         {
             Debug.LogError("Player Text In Game is not assigned in GameSceneManager!");
         }
+    }
+
+    public void UpdateReadyText(int ready, int total)
+    {
+        readyText.text = $"{ready}/{total} Ready";
+    }
+
+    public void UpdateCountdownText(string message)
+    {
+        countdownText.text = message;
     }
 
     private void UpdateESCMenuText()

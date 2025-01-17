@@ -18955,6 +18955,12 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   gameSceneManager: {fileID: 1742802786}
   totalToursRequired: 3
+  readyCount:
+    m_InternalValue: 0
+  totalPlayers:
+    m_InternalValue: 0
+  readyText: {fileID: 1751215274}
+  countdownText: {fileID: 670304017}
 --- !u!4 &1551681636
 Transform:
   m_ObjectHideFlags: 0
@@ -20913,6 +20919,8 @@ MonoBehaviour:
   mainMenuButton: {fileID: 289851459}
   exitButton: {fileID: 1064290848}
   playerTextInGame: {fileID: 901839371}
+  readyText: {fileID: 1751215274}
+  countdownText: {fileID: 670304017}
   winnerText: {fileID: 234763334}
   restartButton: {fileID: 1383830546}
   menuButton: {fileID: 1928484901}

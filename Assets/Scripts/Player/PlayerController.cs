@@ -22,6 +22,8 @@ public class PlayerController : NetworkBehaviour
     public Transform modelContainer;
     private int lastModelIndex = -1;
 
+    private bool canMove = false;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -62,9 +64,11 @@ public class PlayerController : NetworkBehaviour
 
         HandleMovement();
     }
-
+    
     private void HandleMovement()
     {
+        if (!canMove) return;
+
         if (Mathf.Abs(moveInput) > 0.1f)
         {
             Vector3 force = transform.forward * (moveInput * acceleration);
@@ -86,6 +90,11 @@ public class PlayerController : NetworkBehaviour
         {
             rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, brakeForce * Time.fixedDeltaTime);
         }
+    }
+
+    public void EnableMovement()
+    {
+        canMove = true;
     }
 
     public void ChangeModelOnPit()

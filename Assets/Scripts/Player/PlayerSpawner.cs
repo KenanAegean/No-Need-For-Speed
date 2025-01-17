@@ -40,9 +40,22 @@ public class PlayerSpawner : MonoBehaviour
         {
             // Server spawns the player
             SpawnPlayer(clientId);
-            Debug.Log($"Client Connceted");
+
+            // Increment totalPlayers in GameCoreManager
+            var gameCoreManager = Object.FindFirstObjectByType<GameCoreManager>(); // Updated to use the new method
+            if (gameCoreManager != null)
+            {
+                gameCoreManager.totalPlayers.Value++;
+            }
+            else
+            {
+                Debug.LogError("GameCoreManager is not found in the scene.");
+            }
+
+            Debug.Log($"Client connected: {clientId}");
         }
     }
+
 
     private void SpawnPlayer(ulong clientId)
     {

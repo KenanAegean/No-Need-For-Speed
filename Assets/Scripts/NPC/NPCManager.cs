@@ -46,6 +46,13 @@ public class NPCManager : NetworkBehaviour
     private void ResetOrSpawnNPC()
     {
         ResetOrSpawnNPCServerRpc();
+
+        if (IsServer)
+        {
+            FindFirstObjectByType<GameCoreManager>().readyCount.Value++;
+            FindFirstObjectByType<GameCoreManager>().totalPlayers.Value++;
+
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
