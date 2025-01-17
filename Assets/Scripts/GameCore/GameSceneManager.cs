@@ -2,6 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameSceneManager : NetworkBehaviour
 {
@@ -107,6 +108,21 @@ public class GameSceneManager : NetworkBehaviour
                 ShowESCMenuPanel();
             }
         }
+    }
+    public void ReloadGameSession()
+    {
+        if (IsServer)
+        {
+            // Host triggers the reload for all clients
+            ReloadSceneForAllClientsClientRpc(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    [ClientRpc]
+    private void ReloadSceneForAllClientsClientRpc(string sceneName)
+    {
+        // Reload the scene for all clients
+        SceneManager.LoadScene(sceneName);
     }
 
     #region Panel Management
@@ -242,8 +258,10 @@ public class GameSceneManager : NetworkBehaviour
         currentTours = 0;
 
         // Show the join panel
-        ShowJoinPanel();
+        //ShowJoinPanel();
         Debug.Log("Restarting game and showing JoinPanel.");
+
+        ReloadGameSession();
     }
 
     public void ResetCar()
@@ -276,8 +294,10 @@ public class GameSceneManager : NetworkBehaviour
         currentTours = 0;
 
         // Show the start panel
-        ShowStartPanel();
+        //ShowStartPanel();
         Debug.Log("Returning to MainMenu and showing StartPanel.");
+
+        ReloadGameSession();
     }
 
     public void HandleGlobalDisconnect()

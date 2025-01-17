@@ -22,7 +22,7 @@ public class AutoAddPlayerToVcamTargets : MonoBehaviour
 
     IEnumerator SetCamera()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
 
         if (GameObject.FindGameObjectsWithTag("Player2").Length > 0)
         {
