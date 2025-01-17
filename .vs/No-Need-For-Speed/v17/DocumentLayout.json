@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\GitHub\\No-Need-For-Speed\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6FFE5288-595B-73A4-74D2-5C36A34165DC}|Assembly-CSharp.csproj|c:\\github\\no-need-for-speed\\assets\\scripts\\gamecore\\gamescenemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6FFE5288-595B-73A4-74D2-5C36A34165DC}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gamecore\\gamescenemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "GameSceneManager.cs",
+              "DocumentMoniker": "C:\\GitHub\\No-Need-For-Speed\\Assets\\Scripts\\GameCore\\GameSceneManager.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\GameCore\\GameSceneManager.cs",
+              "ToolTip": "C:\\GitHub\\No-Need-For-Speed\\Assets\\Scripts\\GameCore\\GameSceneManager.cs",
+              "RelativeToolTip": "Assets\\Scripts\\GameCore\\GameSceneManager.cs",
+              "ViewState": "AgIAAIUAAAAAAAAAAAAswLkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-14T14:22:30.736Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
