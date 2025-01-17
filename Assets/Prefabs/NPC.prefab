@@ -337,7 +337,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   waypointParent: {fileID: 0}
-  moveSpeed: 5
+  moveSpeed: 20
   rotationSpeed: 5
 --- !u!114 &-2793465933095245837
 MonoBehaviour:

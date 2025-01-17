@@ -275,11 +275,11 @@ public class GameSceneManager : NetworkBehaviour
         }
     }
 
-    public void UpdatePlayerTourText(ulong clientId, int currentTours, int totalTours)
+    public void UpdatePlayerTourText(string playerName, int currentTours, int totalTours)
     {
         if (playerTextInGame != null)
         {
-            playerTextInGame.text = $"Player {clientId}: {currentTours}/{totalTours}";
+            playerTextInGame.text = $"{playerName}: {currentTours}/{totalTours}";
         }
     }
 

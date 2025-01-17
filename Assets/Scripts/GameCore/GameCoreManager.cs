@@ -136,8 +136,6 @@ public class GameCoreManager : NetworkBehaviour
             npcTours[networkObjectId]++;
             Debug.Log($"NPC {networkObjectId} completed a tour! ({npcTours[networkObjectId]}/{totalToursRequired})");
 
-            // Update UI for NPC tours if needed
-            UpdateNpcToursClientRpc(networkObjectId, npcTours[networkObjectId]);
 
             // Check for game over
             if (npcTours[networkObjectId] >= totalToursRequired)
@@ -169,30 +167,38 @@ public class GameCoreManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void UpdatePlayerToursClientRpc(ulong clientId, int toursCompleted)
+    private void UpdatePlayerToursClientRpc(ulong networkObjectId, int toursCompleted)
     {
-        // Update in-game panel for this player
-        if (gameSceneManager != null)
-        {
-            gameSceneManager.UpdatePlayerTourText(clientId, toursCompleted, totalToursRequired);
-        }
+        string playerName = GetNetworkName(networkObjectId);
+        gameSceneManager.UpdatePlayerTourText(playerName, toursCompleted, totalToursRequired);
     }
 
-    [ClientRpc]
-    private void UpdateNpcToursClientRpc(ulong npcId, int toursCompleted)
-    {
-        // Logic to update NPC tours UI (optional)
-    }
 
     [ClientRpc]
     private void ShowWinnerClientRpc(ulong winnerId, bool isNpc)
     {
         if (gameSceneManager != null)
         {
+            string winnerName = GetNetworkName(winnerId);
             string winnerType = isNpc ? "NPC" : "Player";
-            gameSceneManager.ShowWinner($"{winnerType} {winnerId}");
+            gameSceneManager.ShowWinner($"{winnerType}: {winnerName}");
         }
     }
+
+    private string GetNetworkName(ulong networkObjectId)
+    {
+        var networkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjectId];
+        if (networkObject != null)
+        {
+            var nameComponent = networkObject.transform.Find("NetworkName")?.GetComponent<TextMeshPro>();
+            if (nameComponent != null)
+            {
+                return nameComponent.text;
+            }
+        }
+        return "Unknown"; // Fallback if no name is found
+    }
+
 
     private void EndGame()
     {
