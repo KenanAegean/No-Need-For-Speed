@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ public class FinishLine : NetworkBehaviour
     public GameCoreManager gameCoreManager; // Reference to GameCoreManager
     public bool useSpecificDirection = false; // Toggle to enable/disable direction checking
     public AllowedDirection allowedDirections = AllowedDirection.Any; // Default to all directions
+    private Dictionary<ulong, bool> hasCrossedFinishLine = new Dictionary<ulong, bool>();
 
     [System.Flags]
     public enum AllowedDirection
@@ -22,25 +24,23 @@ public class FinishLine : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Check if the object that triggered the collider is a player
         if (IsServer && (other.CompareTag("Player") || other.CompareTag("Player2") || other.CompareTag("NPC")))
         {
-            // Direction validation logic
-            if (!useSpecificDirection || allowedDirections == AllowedDirection.Any)
+            var networkObject = other.GetComponent<NetworkObject>();
+            if (networkObject == null) return;
+
+            ulong clientId = networkObject.OwnerClientId;
+
+            // Check if this is the first time crossing the finish line
+            if (!hasCrossedFinishLine.ContainsKey(clientId))
             {
-                NotifyFinishLineServerRpc(other.GetComponent<NetworkObject>().OwnerClientId);
-                return;
+                hasCrossedFinishLine[clientId] = true;
+                Debug.Log($"Player {clientId} crossed the finish line for the first time.");
+                return; // Skip updating tour count
             }
 
-            Vector3 playerDirection = (other.transform.position - transform.position).normalized;
-            if (IsDirectionValid(playerDirection))
-            {
-                NotifyFinishLineServerRpc(other.GetComponent<NetworkObject>().OwnerClientId);
-            }
-            else
-            {
-                Debug.Log("Player crossed the finish line from the wrong direction.");
-            }
+            // Notify GameCoreManager
+            gameCoreManager.PlayerReachedFinishLine(clientId);
         }
     }
 
@@ -71,6 +71,6 @@ public class FinishLine : NetworkBehaviour
             return;
         }
 
-        gameCoreManager.PlayerReachedFinishLine();
+       // gameCoreManager.PlayerReachedFinishLine();
     }
 }

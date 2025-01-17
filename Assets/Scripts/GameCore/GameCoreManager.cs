@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using System.Collections;
 using System.Linq;
+using System.Collections.Generic;
 
 public class GameCoreManager : NetworkBehaviour
 {
@@ -13,6 +14,8 @@ public class GameCoreManager : NetworkBehaviour
 
     public NetworkVariable<int> readyCount = new NetworkVariable<int>(0);
     public NetworkVariable<int> totalPlayers = new NetworkVariable<int>(0);
+
+    private Dictionary<ulong, int> playerTours = new Dictionary<ulong, int>();
 
     [SerializeField] private TMP_Text readyText;
     [SerializeField] private TMP_Text countdownText;
@@ -120,21 +123,43 @@ public class GameCoreManager : NetworkBehaviour
         }
     }
 
-    public void PlayerReachedFinishLine()
+    public void PlayerReachedFinishLine(ulong clientId)
     {
-        if (IsServer)
+        if (!playerTours.ContainsKey(clientId))
         {
-            currentTours.Value++; // Update the tour count on the server
-            Debug.Log($"Player reached finish line! Tour: {currentTours.Value}/{totalToursRequired}");
+            playerTours[clientId] = 0;
+        }
 
-            // Update the UI on all clients
-            UpdateInGamePanelClientRpc(currentTours.Value, totalToursRequired);
+        playerTours[clientId]++;
+        Debug.Log($"Player {clientId} completed a tour! ({playerTours[clientId]}/{totalToursRequired})");
 
-            // Check if the game should end
-            if (currentTours.Value >= totalToursRequired)
-            {
-                EndGame();
-            }
+        // Update UI for all clients
+        UpdatePlayerToursClientRpc(clientId, playerTours[clientId]);
+
+        // Check for game over
+        if (playerTours[clientId] >= totalToursRequired)
+        {
+            Debug.Log($"Game over! Player {clientId} wins!");
+            ShowWinnerClientRpc(clientId);
+        }
+    }
+
+    [ClientRpc]
+    private void UpdatePlayerToursClientRpc(ulong clientId, int toursCompleted)
+    {
+        // Update in-game panel for this player
+        if (gameSceneManager != null)
+        {
+            gameSceneManager.UpdatePlayerTourText(clientId, toursCompleted, totalToursRequired);
+        }
+    }
+
+    [ClientRpc]
+    private void ShowWinnerClientRpc(ulong clientId)
+    {
+        if (gameSceneManager != null)
+        {
+            gameSceneManager.ShowWinner(clientId);
         }
     }
 

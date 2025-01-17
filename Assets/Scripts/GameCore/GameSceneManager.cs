@@ -134,7 +134,6 @@ public class GameSceneManager : NetworkBehaviour
     {
         SetActivePanel(endGamePanel);
         PauseGame();
-        winnerText.text = "Game Over!";
     }
 
     public void ShowESCMenuPanel()
@@ -268,12 +267,29 @@ public class GameSceneManager : NetworkBehaviour
     {
         if (playerTextInGame != null)
         {
-            playerTextInGame.text = $"Game In Progress... Tours: {currentTours}/{totalToursRequired}";
+            //playerTextInGame.text = $"Game In Progress... Tours: {currentTours}/{totalToursRequired}";
         }
         else
         {
             Debug.LogError("Player Text In Game is not assigned in GameSceneManager!");
         }
+    }
+
+    public void UpdatePlayerTourText(ulong clientId, int currentTours, int totalTours)
+    {
+        if (playerTextInGame != null)
+        {
+            playerTextInGame.text = $"Player {clientId}: {currentTours}/{totalTours}";
+        }
+    }
+
+    public void ShowWinner(ulong winnerClientId)
+    {
+        if (winnerText != null)
+        {
+            winnerText.text = $"Player {winnerClientId} wins the race!";
+        }
+        ShowEndGamePanel();
     }
 
     public void UpdateReadyText(int ready, int total)
