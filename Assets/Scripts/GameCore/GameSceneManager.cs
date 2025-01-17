@@ -24,6 +24,7 @@ public class GameSceneManager : NetworkBehaviour
     public GameObject startPanel;
     public GameObject joinPanel;
     public GameObject inGamePanel;
+    public GameObject howToPlayPanel;
     public GameObject endGamePanel;
     public GameObject escMenuPanel;
 
@@ -37,6 +38,9 @@ public class GameSceneManager : NetworkBehaviour
     public TMP_Text playerTextInGame;
     public TMP_Text readyText;
     public TMP_Text countdownText;
+
+    [Header("How To Play Panel Components")]
+    public Button closeButton;
 
     [Header("End Game Panel Components")]
     public TMP_Text winnerText;
@@ -88,6 +92,7 @@ public class GameSceneManager : NetworkBehaviour
         resetCarButton.onClick.AddListener(ResetCar);
         exitSessionButton.onClick.AddListener(ExitSession);
         exitGameButton.onClick.AddListener(ExitGame);
+        closeButton.onClick.AddListener(CloseHowToPlay);
 
 
 
@@ -200,12 +205,20 @@ public class GameSceneManager : NetworkBehaviour
         {
             //Debug.LogError("Failed to start Client.");
         }
-        joinPanel.SetActive(false); //delete later
+        //joinPanel.SetActive(false); //delete later
     }
 
+    public void openHowToPlay()
+    {
+        howToPlayPanel.SetActive(true);
+    }
 
+    public void CloseHowToPlay()
+    {
+        howToPlayPanel.SetActive(false);
+        inGamePanel.SetActive(true);
+    }
     
-
     private void StartGame()
     {
         Debug.Log("All players have joined. Starting the game...");
@@ -220,18 +233,9 @@ public class GameSceneManager : NetworkBehaviour
             Debug.LogError("Join Panel is not assigned in GameSceneManager!");
         }
 
-        if (inGamePanel != null)
-        {
-            inGamePanel.SetActive(true);
-        }
-        else
-        {
-            Debug.LogError("In-Game Panel is not assigned in GameSceneManager!");
-        }
-
+        openHowToPlay();
         ResumeGame();
 
-        // Add additional logic to start gameplay if necessary
     }
 
 
