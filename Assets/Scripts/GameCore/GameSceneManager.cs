@@ -231,8 +231,19 @@ public class GameSceneManager : NetworkBehaviour
 
     public void RestartGame()
     {
+        // Disconnect the player
+        if (NetworkManager.Singleton.IsClient || NetworkManager.Singleton.IsHost)
+        {
+            NetworkManager.Singleton.Shutdown();
+            Debug.Log("Player disconnected during restart.");
+        }
+
+        // Reset game state if necessary
         currentTours = 0;
+
+        // Show the join panel
         ShowJoinPanel();
+        Debug.Log("Restarting game and showing JoinPanel.");
     }
 
     public void ResetCar()
@@ -254,11 +265,71 @@ public class GameSceneManager : NetworkBehaviour
 
     public void ReturnToMainMenu()
     {
+        // Disconnect the player
+        if (NetworkManager.Singleton.IsClient || NetworkManager.Singleton.IsHost)
+        {
+            NetworkManager.Singleton.Shutdown();
+            Debug.Log("Player disconnected and returning to Main Menu.");
+        }
+
+        // Reset game state if necessary
         currentTours = 0;
-        Time.timeScale = 1f;
-        Debug.Log("Game reset and returning to main menu.");
+
+        // Show the start panel
         ShowStartPanel();
+        Debug.Log("Returning to MainMenu and showing StartPanel.");
     }
+
+    public void HandleGlobalDisconnect()
+    {
+        // Disconnect all players and shutdown the network
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+            Debug.Log("All players disconnected.");
+        }
+
+        // Return to the main menu
+        ReturnToMainMenu();
+    }
+
+    private void OnEnable()
+    {
+        NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
+    }
+
+    private void OnDisable()
+    {
+        NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
+    }
+
+    private void HandleClientDisconnect(ulong clientId)
+    {
+        if (NetworkManager.Singleton.IsHost)
+        {
+            if (clientId == NetworkManager.Singleton.LocalClientId)
+            {
+                // Host disconnects: Disconnect everyone and return to the main menu
+                Debug.Log("Host disconnected. Disconnecting all players.");
+                HandleGlobalDisconnect();
+            }
+            else
+            {
+                // A client disconnected while the host is still active
+                Debug.Log($"Client {clientId} disconnected. Host will also disconnect and return to the main menu.");
+                HandleGlobalDisconnect();
+            }
+        }
+        else
+        {
+            // Client is not the host and is disconnecting
+            Debug.Log($"Client {clientId} disconnected. Disconnecting and returning to the main menu.");
+            HandleGlobalDisconnect();
+        }
+    }
+
+
+
     #endregion
 
     #region UI Updates
