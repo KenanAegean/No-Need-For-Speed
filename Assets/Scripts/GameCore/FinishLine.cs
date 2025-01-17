@@ -23,7 +23,7 @@ public class FinishLine : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // Check if the object that triggered the collider is a player
-        if (IsServer && other.CompareTag("Player"))
+        if (IsServer && (other.CompareTag("Player") || other.CompareTag("Player2") || other.CompareTag("NPC")))
         {
             // Direction validation logic
             if (!useSpecificDirection || allowedDirections == AllowedDirection.Any)

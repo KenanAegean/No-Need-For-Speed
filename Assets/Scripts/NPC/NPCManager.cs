@@ -31,14 +31,14 @@ public class NPCManager : NetworkBehaviour
             npcInstance.transform.position = spawnPoint.position;
             npcInstance.transform.rotation = spawnPoint.rotation;
             var npcMovement = npcInstance.GetComponent<NPCMovement>();
-            npcMovement.ToggleMovementServerRpc(); // Stop movement
+            npcMovement.ToggleMovementServerRpc();
         }
         else
         {
             // Spawn a new NPC
             npcInstance = Instantiate(npcPrefab, spawnPoint.position, spawnPoint.rotation);
             var npcMovement = npcInstance.GetComponent<NPCMovement>();
-            npcMovement.waypointParent = waypointParent; // Assign waypoints
+            npcMovement.waypointParent = waypointParent;
             npcInstance.GetComponent<NetworkObject>().Spawn();
         }
     }
