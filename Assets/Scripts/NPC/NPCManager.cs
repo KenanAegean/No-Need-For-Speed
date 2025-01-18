@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class NPCManager : NetworkBehaviour
 {
-    public GameObject npcPrefab;      // NPC prefab
-    public Transform spawnPoint;      // Spawn point for the NPC
-    public Transform waypointParent;  // Parent of waypoints
+    public GameObject npcPrefab;
+    public Transform spawnPoint; 
+    public Transform waypointParent;  
 
-    private GameObject npcInstance;   // Instance of the spawned NPC
+    private GameObject npcInstance;  
 
     void Update()
     {

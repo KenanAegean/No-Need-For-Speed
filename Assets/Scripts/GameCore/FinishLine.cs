@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class FinishLine : NetworkBehaviour
 {
-    public GameCoreManager gameCoreManager; // Reference to GameCoreManager
-    public bool useSpecificDirection = false; // Toggle to enable/disable direction checking
-    public AllowedDirection allowedDirections = AllowedDirection.Any; // Default to all directions
+    public GameCoreManager gameCoreManager;
+    public bool useSpecificDirection = false;
+    public AllowedDirection allowedDirections = AllowedDirection.Any;
     private Dictionary<ulong, bool> hasCrossedFinishLine = new Dictionary<ulong, bool>();
 
     [System.Flags]
@@ -31,18 +31,45 @@ public class FinishLine : NetworkBehaviour
 
             ulong networkObjectId = networkObject.NetworkObjectId;
 
-            // Check if this is the first time crossing the finish line
+            // Calculate player's relative position to the finish line
+            Vector3 relativePosition = other.transform.position - transform.position;
+            Vector3 finishLineForward = transform.forward;
+
+            // Check if the player is on the forward or backward side
+            bool isBehindFinishLine = Vector3.Dot(relativePosition, finishLineForward) < 0;
+
+            // If the player is on the forward side of the finish line, ignore the crossing
+            if (!isBehindFinishLine)
+            {
+                Debug.Log($"Entity {networkObjectId} attempted to cross from the forward side. Crossing is invalid.");
+                return;
+            }
+
+            // Optional: Validate specific movement direction
+            Vector3 playerDirection = other.transform.forward.normalized; // Movement direction
+            if (useSpecificDirection && Vector3.Dot(playerDirection, finishLineForward) < 0)
+            {
+                Debug.Log($"Entity {networkObjectId} is moving backward but is behind the finish line. Crossing counts.");
+            }
+            else if (useSpecificDirection && !IsDirectionValid(playerDirection))
+            {
+                Debug.Log($"Entity {networkObjectId} is behind the finish line but moving in an invalid direction.");
+                return;
+            }
+
+            // Ensure only valid crossings increment the tour count
             if (!hasCrossedFinishLine.ContainsKey(networkObjectId))
             {
                 hasCrossedFinishLine[networkObjectId] = true;
                 Debug.Log($"Entity {networkObjectId} crossed the finish line for the first time.");
-                return; // Skip updating tour count
+                return; // Skip updating tour count for first-time crossing
             }
 
-            // Notify GameCoreManager
             gameCoreManager.PlayerReachedFinishLine(networkObjectId, other.CompareTag("NPC"));
         }
     }
+
+
 
 
     private bool IsDirectionValid(Vector3 playerDirection)
@@ -71,7 +98,5 @@ public class FinishLine : NetworkBehaviour
             Debug.LogError("GameCoreManager reference is missing in FinishLine!");
             return;
         }
-
-       // gameCoreManager.PlayerReachedFinishLine();
     }
 }

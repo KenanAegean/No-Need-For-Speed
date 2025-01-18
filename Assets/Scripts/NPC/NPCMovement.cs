@@ -3,17 +3,16 @@ using UnityEngine;
 
 public class NPCMovement : NetworkBehaviour
 {
-    public Transform waypointParent; // Parent object containing waypoints
-    public float moveSpeed = 5f;     // Movement speed
-    public float rotationSpeed = 5f; // Rotation speed
+    public Transform waypointParent; 
+    public float moveSpeed = 5f;     
+    public float rotationSpeed = 5f; 
 
-    private Transform[] waypoints;  // Array of waypoints
+    private Transform[] waypoints;  
     private int currentWaypointIndex = 0;
-    private bool isMoving = false;  // Initially no movement
+    private bool isMoving = false; 
 
     private void Start()
     {
-        // Populate waypoints array from the parent's children
         if (waypointParent != null)
         {
             waypoints = new Transform[waypointParent.childCount];

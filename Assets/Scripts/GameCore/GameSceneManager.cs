@@ -16,7 +16,7 @@ public class GameSceneManager : NetworkBehaviour
         }
         else
         {
-            Destroy(gameObject); // Ensure only one instance exists
+            Destroy(gameObject); 
         }
     }
 
@@ -55,8 +55,8 @@ public class GameSceneManager : NetworkBehaviour
     public TMP_Text playerTextESCMenu;
 
     [Header("Game State")]
-    public int totalPlayers = 2; // Total players in the game
-    public int totalToursRequired = 3; // Number of tours needed to finish
+    public int totalPlayers = 2; 
+    public int totalToursRequired = 3;
     private int currentTours = 0;
 
     private bool isGamePaused = true;

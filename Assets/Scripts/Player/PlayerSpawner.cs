@@ -6,10 +6,10 @@ using System.Collections;
 public class PlayerSpawner : MonoBehaviour
 {
     [Header("Spawn Points")]
-    public Transform[] spawnPoints; // Assign spawn points here
+    public Transform[] spawnPoints;
 
     [Header("Player Prefabs")]
-    public GameObject[] playerPrefabs; // Array for multiple player prefabs
+    public GameObject[] playerPrefabs;
 
     private void Start()
     {
@@ -42,7 +42,7 @@ public class PlayerSpawner : MonoBehaviour
             SpawnPlayer(clientId);
 
             // Increment totalPlayers in GameCoreManager
-            var gameCoreManager = Object.FindFirstObjectByType<GameCoreManager>(); // Updated to use the new method
+            var gameCoreManager = Object.FindFirstObjectByType<GameCoreManager>();
             if (gameCoreManager != null)
             {
                 gameCoreManager.totalPlayers.Value++;

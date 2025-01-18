@@ -16,7 +16,7 @@ public class PlayerController : NetworkBehaviour
     private Rigidbody rb;
 
     [Header("Emote System")]
-    public Transform emoteContainer; // Assign the EmoteContainer in the Inspector.
+    public Transform emoteContainer;
 
     [Header("Model Management")]
     public Transform modelContainer;
@@ -41,11 +41,9 @@ public class PlayerController : NetworkBehaviour
         // Allow only the owner of this player object to control it
         if (!IsOwner) return;
 
-        // Get input
         moveInput = Input.GetAxis("Vertical");
         turnInput = Input.GetAxis("Horizontal");
 
-        // Show random emote on "E" press
         if (Input.GetKeyDown(KeyCode.E))
         {
             ShowRandomEmoteServerRpc();
@@ -59,7 +57,6 @@ public class PlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        // Allow only the owner of this player object to control it
         if (!IsOwner) return;
 
         HandleMovement();
@@ -119,9 +116,9 @@ public class PlayerController : NetworkBehaviour
         do
         {
             randomIndex = Random.Range(0, modelContainer.childCount);
-        } while (randomIndex == lastModelIndex); // Ensure a different model is selected
+        } while (randomIndex == lastModelIndex);
 
-        lastModelIndex = randomIndex; // Update the last selected model index
+        lastModelIndex = randomIndex;
         return randomIndex;
     }
 
