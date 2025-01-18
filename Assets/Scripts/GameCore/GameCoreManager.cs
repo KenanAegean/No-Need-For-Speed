@@ -7,10 +7,10 @@ using System.Collections.Generic;
 
 public class GameCoreManager : NetworkBehaviour
 {
-    public GameSceneManager gameSceneManager; // Reference to GameSceneManager
-    public int totalToursRequired = 3; // Total tours required to finish the game
+    public GameSceneManager gameSceneManager; 
+    public int totalToursRequired = 3; 
 
-    private NetworkVariable<int> currentTours = new NetworkVariable<int>(0); // Track completed tours across the network
+    private NetworkVariable<int> currentTours = new NetworkVariable<int>(0);
 
     public NetworkVariable<int> readyCount = new NetworkVariable<int>(0);
     public NetworkVariable<int> totalPlayers = new NetworkVariable<int>(0);
@@ -119,7 +119,7 @@ public class GameCoreManager : NetworkBehaviour
 
         foreach (var npc in Object.FindObjectsByType<NPCMovement>(FindObjectsSortMode.None))
         {
-            Debug.Log($"Starting movement for NPC: {npc.gameObject.name}"); // Debug log
+            Debug.Log($"Starting movement for NPC: {npc.gameObject.name}"); 
             npc.ToggleMovementServerRpc(true);
         }
     }
