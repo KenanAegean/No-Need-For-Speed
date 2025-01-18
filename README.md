@@ -28,7 +28,7 @@ FG Game Network Course Assigment
 
 ## Controls
 
-<img src="for_readme/controls.png"><br>
+<img src="for_readme/control.png"><br>
 
 ---
 
