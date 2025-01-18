@@ -76,7 +76,7 @@ Screenshots           |  Screenshots
 - Manages emotes and model changes synchronized via server and client RPCs.
 
 #### GameCoreManager.cs
-<img src="for_readme/cores.png"><br>
+<img src="for_readme/core.png"><br>
 
 - Centralizes game logic, including player readiness, countdowns, and progress tracking.
 - Uses `NetworkVariable` for shared states and `ClientRpc` for UI updates.
