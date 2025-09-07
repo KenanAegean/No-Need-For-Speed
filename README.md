@@ -3,7 +3,7 @@ FG Game Network Course Assigment
 <br>
 - Futuregames Academy
 - (13 January 2025)
-- Teacher referance: <a href="">Toby van Buynder</a>
+<!-- - Teacher referance: <a href="">Toby van Buynder</a> -->
 
 ### Title: No Need For Speed
 
