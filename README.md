@@ -9,7 +9,7 @@ FG Game Network Course Assigment
 
 <p align="center">
   <img src="for_readme/logo_white.png" width="350" title="hover text"><br>
-  <a href="">Try Game On Browser</a>
+  <!-- <a href="">Try Game On Browser</a> -->
 </p>
 
 "No Need For Speed" is a networked multiplayer racing game developed using Unity's Netcode for GameObjects (NGO). The focus is on fun, accessibility, and balanced multiplayer gameplay rather than realistic physics or high-speed precision. The game features dynamic environments, customizable vehicles, and a finish-line mechanic that tracks progress across multiple tours.
